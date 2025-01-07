@@ -158,32 +158,33 @@ fetch("/users", {
 
 管理者は全ての操作ができますが、モデレーターユーザーは`GET`リクエストのみアクセスでき、リソースは変更できません。
 
-| エンドポイント | メソッド | 権限 | 説明 |
-| `/users` | `POST` | 🔒 | ユーザーの登録を行います。管理者およびモデレーターの登録は別です。|
-| `/users/:user_id` | `GET` | 🌐 | ユーザー情報を取得できます。一般のユーザー取得できるのは自分自身または売り手ユーザーのみです。|
-| `/users/:user_id` | `PATCH` | 🔒 | ユーザーを更新します。 |
-| `/users/:user_id` | `DELETE` | 🔒 | ユーザーを削除します。 |
-| `/users/:user_id/cart` | `GET` | 🛍️ | ユーザーのカートを取得します。 カートはユーザーの作成と同時に作られます。|
-| `/users/:user_id/cart/add` | `PATCH` | 🛍️| ユーザーのカートに製品を追加します。 |
-| `/users/:user_id/cart/subtract` | `PATCH` | 🛍️ | ユーザーのカートから製品の個数を減らします。減らした結果として 0 になった場合は、その製品は削除されます。 |
-| `/users/:user_id/cart` | `DELETE` | ユーザーのカートから全ての製品が消えます。 |
-| `/users/:user_id/reviews` | `GET` | 🌐 | あるユーザーの製品のリストを取得します。 |
-| `/users/:user_id/reviews` | `POST` | 🛍️ | あるユーザーのレビューを作成します。 |
-| `/users/:user_id/reviews/:review_id` | `PATCH` | 🛍️ | あるユーザーのレビューを更新します。 |
-| `/users/:user_id/reviews/:review_id` | `DELETE` | 🛍️ | あるユーザーのレビューを削除します。 |
-| `/users/:user_id/orders` | `GET` | 🔒 | 自身の注文履歴を全て取得します。 |
-| `/users/:user_id/orders/:order_id` | `GET` | 🔒 | 特定の注文履歴を取得します。 |
-| `/users/:user_id/orders/:order_id` | `PATCH` | 🛒 | 特定の注文のステータスを変更します。買い手の注文履歴も同時に更新されます。 |
-| `/procuts` | `GET` | 🌐 | 製品を取得します。 |
-| `/products` | `POST` | 🛒 | 製品を作成します。 |
-| `/products/:product_id` | `GET` | 🌐 | 製品を取得します。 |
-| `/products/:product_id` | `PATCH` | 🛒 | 製品を更新します。 |
-| `/products/:product_id` | `DELETE` | 🛒 | 製品を削除します。 |
-| `/products/upload-thumb` | `POST` | 🛒 | 一時保存された製品のサムネイル画像のデータを取得します。単一の画像データを受け取ります。 |
-| `/products/upload-images` | `POST` | 🛒 | 一時保存された製品画像の情報のリストを取得します。 複数の画像データの配列を受け取ります。|
-| `/payment` | `POST` | 🛍️ | 配送先の住所と支払いの成功・失敗時のリダイレクト先を本文に添付してください。|
-| `/webhook` | `POST` | 🌐 | Stripe での支払いに成功した場合のリダイレクト先です。 |
-| `/health` | `GET` | 🌐 | サーバーの稼働状況を確かめます。 |
+| エンドポイント                       | メソッド | 権限 | 説明                                                                                                      |
+| ------------------------------------ | -------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `/users`                             | `POST`   | 🔒   | ユーザーの登録を行います。管理者およびモデレーターの登録は別です。                                        |
+| `/users/:user_id`                    | `GET`    | 🌐   | ユーザー情報を取得できます。一般のユーザー取得できるのは自分自身または売り手ユーザーのみです。            |
+| `/users/:user_id`                    | `PATCH`  | 🔒   | ユーザーを更新します。                                                                                    |
+| `/users/:user_id`                    | `DELETE` | 🔒   | ユーザーを削除します。                                                                                    |
+| `/users/:user_id/cart`               | `GET`    | 🛍️   | ユーザーのカートを取得します。 カートはユーザーの作成と同時に作られます。                                 |
+| `/users/:user_id/cart/add`           | `PATCH`  | 🛍️   | ユーザーのカートに製品を追加します。                                                                      |
+| `/users/:user_id/cart/subtract`      | `PATCH`  | 🛍️   | ユーザーのカートから製品の個数を減らします。減らした結果として 0 になった場合は、その製品は削除されます。 |
+| `/users/:user_id/cart`               | `DELETE` | 🛍️   | ユーザーのカートから全ての製品が消えます。                                                                |
+| `/users/:user_id/reviews`            | `GET`    | 🌐   | あるユーザーの製品のリストを取得します。                                                                  |
+| `/users/:user_id/reviews`            | `POST`   | 🛍️   | あるユーザーのレビューを作成します。                                                                      |
+| `/users/:user_id/reviews/:review_id` | `PATCH`  | 🛍️   | あるユーザーのレビューを更新します。                                                                      |
+| `/users/:user_id/reviews/:review_id` | `DELETE` | 🛍️   | あるユーザーのレビューを削除します。                                                                      |
+| `/users/:user_id/orders`             | `GET`    | 🔒   | 自身の注文履歴を全て取得します。                                                                          |
+| `/users/:user_id/orders/:order_id`   | `GET`    | 🔒   | 特定の注文履歴を取得します。                                                                              |
+| `/users/:user_id/orders/:order_id`   | `PATCH`  | 🛒   | 特定の注文のステータスを変更します。買い手の注文履歴も同時に更新されます。                                |
+| `/procuts`                           | `GET`    | 🌐   | 製品を取得します。                                                                                        |
+| `/products`                          | `POST`   | 🛒   | 製品を作成します。                                                                                        |
+| `/products/:product_id`              | `GET`    | 🌐   | 製品を取得します。                                                                                        |
+| `/products/:product_id`              | `PATCH`  | 🛒   | 製品を更新します。                                                                                        |
+| `/products/:product_id`              | `DELETE` | 🛒   | 製品を削除します。                                                                                        |
+| `/products/upload-thumb`             | `POST`   | 🛒   | 一時保存された製品のサムネイル画像のデータを取得します。単一の画像データを受け取ります。                  |
+| `/products/upload-images`            | `POST`   | 🛒   | 一時保存された製品画像の情報のリストを取得します。 複数の画像データの配列を受け取ります。                 |
+| `/payment`                           | `POST`   | 🛍️   | 配送先の住所と支払いの成功・失敗時のリダイレクト先を本文に添付してください。                              |
+| `/webhook`                           | `POST`   | 🌐   | Stripe での支払いに成功した場合のリダイレクト先です。                                                     |
+| `/health`                            | `GET`    | 🌐   | サーバーの稼働状況を確かめます。                                                                          |
 
 ### ユーザーの権限を管理するルート
 
@@ -262,13 +263,14 @@ fetch("/users", {
 
 - **API ルートの一覧**
 
-| エンドポイント | メソッド | 権限 | 説明 |
-| `/priviledged/user-id` | `GET` | 🛡️ | 管理者またはモデレーターとするユーザーの ID を取得する。 |
-| `/privileged/users` | `GET` | 👑 | 管理者・モデレーターの一覧を取得する。 |
-| `/privileged/users` | `POST` | 👑 | 管理者・モデレーターを作成する。 |
-| `/privileged/users/:user_id` | `GET` 🛡️ | モデレーターの場合は、自身のデータだけを取得できる。 |
-| `/privileged/users/:user_id` | `PATCH` | 👑 |管理者・モデレーターのデータを変更する。 |
-| `/privileged/users/:user_id` | `DELETE` | 👑 | 管理者・モデレーターを削除する。 |
+| エンドポイント               | メソッド | 権限 | 説明                                                     |
+| ---------------------------- | -------- | ---- | -------------------------------------------------------- |
+| `/priviledged/user-id`       | `GET`    | 🛡️   | 管理者またはモデレーターとするユーザーの ID を取得する。 |
+| `/privileged/users`          | `GET`    | 👑   | 管理者・モデレーターの一覧を取得する。                   |
+| `/privileged/users`          | `POST`   | 👑   | 管理者・モデレーターを作成する。                         |
+| `/privileged/users/:user_id` | `GET`    | 🛡️   | モデレーターの場合は、自身のデータだけを取得できる。     |
+| `/privileged/users/:user_id` | `PATCH`  | 👑   | 管理者・モデレーターのデータを変更する。                 |
+| `/privileged/users/:user_id` | `DELETE` | 👑   | 管理者・モデレーターを削除する。                         |
 
 ## データ型
 
