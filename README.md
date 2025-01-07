@@ -4,7 +4,7 @@
 
 基本的な買い物アプリの実装は行われており、エンドポイントのテストも行われています。
 
-ただし、Cloudinary や Stripe はモックを利用しているため、果たして本当に機能するかは神のみぞ知ります。
+ただし、Cloudinary や Stripe はモックしているため、果たして本当に機能するかは神のみぞ知ります。
 
 ## 使用しているサービス
 
@@ -36,8 +36,9 @@
 
 製品画像のサムネイルが保存されるまでの流れを示します。
 
-1. `/products/upload-thumb`へ要求を送る
-   リクエストの本文は`Content-Type: multipart/form-data`形式、`thumbnail`という名前で、リクエストを送信します。
+1. **リクエストを送る**
+
+   リクエストの本文は`Content-Type: multipart/form-data`形式、`thumbnail`という名前で、`/products/リクエストを送信します。
 
    フロントエンドではこのようにしたらいいでしょう。
 
@@ -48,7 +49,7 @@
    	const input = document.querySelector("input");
    	const img = document.querySelector("img");
 
-   	form.addEventListener("change", (event) => {
+   	input.addEventListener("change", (event) => {
    		const files = event.currentTarget.files;
 
    		if (files.length !== 0) {
@@ -71,7 +72,7 @@
    </script>
    ```
 
-2. 一時的に利用するディレクトリに保存される
+2. **一時的に利用するディレクトリに保存される**
 
    送信された画像は、Cloudinary の`temp`ディレクトリに保存され、`temporary`というタグが付けられます。このタグの付与されたデータは Cloudinary の管理画面から定期的に削除できるよう設定できます。
 
@@ -89,11 +90,11 @@
 
    後述する『製品の登録と同時に画像』のステップでは、このときに返された`public_id`を`thumbnail`プロパティの値として送信してください。
 
-3. イベントの発火
+3. **イベントの発火**
 
    Cloudinary に無事に画像が保存されると、`upload-completed`イベントが発火し、サーバー上の`temp`ディレクトリ内にあるその画像が削除されます。
 
-4. 製品の登録と画像の永続化
+4. **製品の登録と画像の永続化**
 
    ユーザーが製品情報を入力し終わり、送信ボタンをクリックしたら、`/products`に**POST**リクエストを送ります。
 
@@ -101,9 +102,9 @@
 
    これにより、Cloudinary の方で、`temp`ディレクトリから、`products/:product_id`ディレクトリに画像が移動し、永続化されます。
 
-5. 完了！
+5. **完了！**
 
-   `images`の処理は`/products/upload-image`にリクエストを送ります。このエンドポイントは複数の画像データを送れるようになっています。
+   `images`の処理は同様な感じで`/products/upload-image`へリクエストを送ります。後述するように、このエンドポイントは複数の画像データを送れるようになっています。
 
 ## 認証について
 
@@ -402,6 +403,80 @@ fetch("/users", {
   }
   ```
 
+- **製品画像**
+
+  画像は、"png"、"jpg"、"webp"の 3 種類を受け取れるようにしています。
+
+  サムネイル画像は 1 枚のみ、他の製品画像は 5 枚まで対応しています。
+
+  - サムネイル
+
+    ```ts
+    input.addEventListener("change", (event) => {
+    	const files = event.currentTarget.files;
+
+    	if (files.length !== 0) {
+    		return;
+    	}
+
+    	const form_data = new FormData();
+
+    	const thumbnail = files[0];
+
+    	form_data.append("thumbnail", thumbnail);
+
+    	fetch("/products/upload-thumb", {
+    		method: "POST",
+    		body: form_data,
+    	})
+    		.then((res) => res.json())
+    		.then(console.log);
+    });
+    ```
+
+    ```ts
+    {
+      success: true,
+      data: {
+        public_id: string;
+        image_url: string;
+      }
+    }
+    ```
+
+  - 他の製品画像
+
+    ```ts
+    input.addEventListener("change", (event) => {
+    	const files = event.currentTarget.files;
+
+    	if (files.length !== 0) {
+    		return;
+    	}
+
+    	const form_data = new FormData();
+
+    	form_data.append("images", files);
+
+    	fetch("/products/upload-images", {
+    		method: "POST",
+    		body: form_data,
+    	})
+    		.then((res) => res.json())
+    		.then(console.log);
+    });
+    ```
+
+    ```ts
+    {
+      success: true,
+      data: {
+        public_id: string;
+        image_url: string;
+      }[]
+    }
+    ```
+
 - **製品**
 
   `short_description`は 50 文字以内、`long_description`は 10 文字以上かつ 2000 文字以内にしてください。
@@ -466,4 +541,4 @@ fetch("/users", {
 
 ## 製品の整合性について
 
-ユーザーがStripeで支払いを行ったにも関わらず、既にその製品が他の誰かに買われているような事態は避けたいところです。これの対策として、ユーザーは、`/payment`にPOSTリクエストを送った際に、カート内の商品から`unpaid`をステータスとする注文を生成するようにしています。3時間ごとに1度のCronジョブで、3時間以内に購入が行われなかった注文は自動的に元に戻され、削除されるようになっています。
+ユーザーが Stripe で支払いを行ったにも関わらず、既にその製品が他の誰かに買われているような事態は避けたいところです。これの対策として、ユーザーは、`/payment`に POST リクエストを送った際に、カート内の商品から`unpaid`をステータスとする注文を生成するようにしています。3 時間ごとに 1 度の Cron ジョブで、3 時間以内に購入が行われなかった注文は自動的に元に戻され、削除されるようになっています。
