@@ -129,7 +129,7 @@ export const UserSchema = z.object({
 export const ProductSchema = z.object({
 	name: user_input_string,
 	thumbnail: user_input_string,
-	images: z.array(user_input_string),
+	images: z.array(user_input_string).max(5),
 	short_description: user_input_string.pipe(z.string().max(50)),
 	long_description: user_input_string.pipe(z.string().min(10).max(2000)),
 	price: positive_int.min(100),
