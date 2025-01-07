@@ -13,21 +13,15 @@ describe("POST /products", () => {
 		short_description: "This is a short description.",
 		long_description: "This is a long description.",
 		price: 100,
-		category_id: "category",
+		category: "category",
 		images: ["NEW_PRODUCT_IMAGE_1"],
 		stock: 1,
-		created_by: TestUserIds.SELLER,
 	};
 
 	const invalid_product: ProductToCreate = {
 		...new_product,
 		price: -100,
 		stock: -10,
-	};
-
-	const other_user_product: ProductToCreate = {
-		...new_product,
-		created_by: "other-uid",
 	};
 
 	async function assert_success_creating_a_product(res: Response) {
@@ -56,14 +50,6 @@ describe("POST /products", () => {
 		const res = await req.login("SELLER").send(new_product);
 
 		await assert_success_creating_a_product(res);
-	});
-
-	test("should return permission error if created_by does not match user id", async () => {
-		const req = new TestAppRequest("POST", "/products");
-
-		const res = await req.login("SELLER").send(other_user_product);
-
-		new TestErrorResponse(res).permission_error();
 	});
 
 	test("validation error if product validation fails", async () => {

@@ -47,7 +47,6 @@ export const mock_buyer: UserDocument = {
 				address2: "city",
 				address3: "town",
 			},
-			default: true,
 		},
 	],
 	created_at: timestamp,
@@ -63,7 +62,7 @@ export const mock_seller: UserDocument = {
 export const mock_buyer_review: ReviewDocument = {
 	id: mock_buyer_review_doc_id,
 	product_id: "mock-product-1",
-	author_id: TestUserIds.BUYER,
+	created_by: TestUserIds.BUYER,
 	title: "Product 1 review",
 	description: "This is a product1 review.",
 	created_at: timestamp,
@@ -73,7 +72,7 @@ export const mock_buyer_review: ReviewDocument = {
 export const mock_other_user_review: ReviewDocument = {
 	...mock_buyer_review,
 	id: mock_other_user_review_doc_id,
-	author_id: mock_other_uid,
+	created_by: mock_other_uid,
 };
 
 export const mock_cart_product_1: ProductDocument = {
@@ -84,7 +83,7 @@ export const mock_cart_product_1: ProductDocument = {
 	short_description: "---SHORT DESCRIPTION---",
 	long_description: "-----------LONG_DESCRIPTION--------------",
 	price: 100,
-	category_id: "category-1",
+	category: "category-1",
 	stock: 100,
 	created_by: TestUserIds.SELLER,
 	created_at: get_timestamp(),
@@ -100,7 +99,7 @@ export const mock_cart_product_2: ProductDocument = {
 	short_description: "---SHORT DESCRIPTION---",
 	long_description: "-----------LONG_DESCRIPTION--------------",
 	price: 50,
-	category_id: "category-1",
+	category: "category-1",
 	stock: 10,
 	created_by: TestUserIds.SELLER,
 };

@@ -18,7 +18,7 @@ export type BaseDocumentFields = {
 
 export type DocumentToCreate<T extends object> = Omit<
 	T,
-	keyof BaseDocumentFields
+	keyof BaseDocumentFields | "created_by"
 >;
 
 export type UserDocument = BaseDocumentFields & z.infer<typeof UserSchema>;
@@ -39,7 +39,7 @@ export type CartPopulated = Omit<
 export type CartDocument = CartItemDocument[];
 
 export type ProductDocument = BaseDocumentFields &
-	z.infer<typeof ProductSchema>;
+	z.infer<typeof ProductSchema> & { created_by: string };
 
 export type Address = z.infer<typeof AddressSchema>;
 
@@ -50,12 +50,12 @@ type OrderProducts = {
 	}[];
 };
 
-export type OrderDocument = BaseDocumentFields &
-	z.infer<typeof OrderStatusSchema> & {
-		amount_total: number;
-		shipping_address: Address;
-		session_id?: string;
-	};
+export type OrderDocument = BaseDocumentFields & {
+	amount_total: number;
+	shipping_address: Address;
+	session_id?: string;
+	status: z.infer<typeof OrderStatusSchema>["status"] | "unpaid" | "paid";
+};
 
 export type BuyerOrderDocument = OrderDocument & {
 	products: OrderProducts;
@@ -67,10 +67,7 @@ export type SellerOrderDocument = OrderDocument & {
 };
 
 export type ReviewDocument = BaseDocumentFields &
-	z.infer<typeof ReviewSchema> & { author_id: string };
-
-export type ShippingDocument = BaseDocumentFields &
-	z.infer<typeof ShippingDetailsSchema>;
+	z.infer<typeof ReviewSchema> & { created_by: string };
 
 export type PaymentDetail = z.infer<typeof PaymentSchema>;
 
@@ -93,12 +90,6 @@ export type ReviewToCreate = Omit<
 	"author_id"
 >;
 
-export type ShippingToCreate = DocumentToCreate<ShippingDocument>;
-
-export const CreatedBySchema = z.object({
-	created_by: document_id,
-});
-
 const UserRoleSchema = z.enum(["buyer", "seller"]);
 
 export const AccessRightsSchema = z.object({
@@ -106,12 +97,14 @@ export const AccessRightsSchema = z.object({
 });
 
 export const OrderStatusSchema = z.object({
-	status: z.enum(["unpaid", "paid", "shipped", "delivered"]),
+	status: z.enum(["shipped", "delivered"]),
 });
 
 const AddressSchema = z.object({
 	recipient_name: user_input_string,
-	zip_code: trimmed_string.regex(/^\d{3}-\d{4}$/),
+	zip_code: trimmed_string.regex(/^\d{3}-\d{4}$/, {
+		message: "Invalid zipcode format.",
+	}),
 	address: z.object({
 		address1: user_input_string,
 		address2: user_input_string,
@@ -129,22 +122,20 @@ export const PrivilegedUserSchema = z.object({
 export const UserSchema = z.object({
 	name: user_input_string,
 	email: z.string().email(),
-	addresses: z.array(AddressSchema.extend({ default: z.boolean() })).nonempty(),
+	addresses: z.array(AddressSchema).nonempty().max(4),
 	role: UserRoleSchema,
 });
 
-export const ProductSchema = z
-	.object({
-		name: user_input_string,
-		thumbnail: user_input_string,
-		images: z.array(user_input_string),
-		short_description: user_input_string.pipe(z.string().min(5)),
-		long_description: user_input_string.pipe(z.string().min(10)),
-		price: positive_int.min(100),
-		category_id: user_input_string,
-		stock: positive_int,
-	})
-	.merge(CreatedBySchema);
+export const ProductSchema = z.object({
+	name: user_input_string,
+	thumbnail: user_input_string,
+	images: z.array(user_input_string),
+	short_description: user_input_string.pipe(z.string().max(50)),
+	long_description: user_input_string.pipe(z.string().min(10).max(2000)),
+	price: positive_int.min(100),
+	category: user_input_string,
+	stock: positive_int,
+});
 
 export const CartUpdatedSchema = z.object({
 	product_id: document_id,
@@ -154,15 +145,7 @@ export const CartUpdatedSchema = z.object({
 export const ReviewSchema = z.object({
 	product_id: document_id,
 	title: user_input_string.pipe(z.string().min(5)),
-	description: user_input_string,
-});
-
-export const ShippingDetailsSchema = z.object({
-	tracking_number: positive_int,
-	carrier: user_input_string,
-	status: z.enum(["shipped", "in transit", "delivered"]),
-	estimated_delivery_start: datetime_string,
-	estimated_delivery_end: datetime_string,
+	description: user_input_string.pipe(z.string().min(10)),
 });
 
 export const PaymentSchema = z.object({

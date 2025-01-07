@@ -1,5 +1,5 @@
 import Router from "@koa/router";
-import { payment_service, PaymentService } from "../service/index.js";
+import { db, payment_service, PaymentService } from "../service/index.js";
 import { PaymentError } from "../errors/index.js";
 
 const router = new Router();
@@ -11,7 +11,10 @@ router.post("/webhook", async (ctx) => {
 
 	switch (event.type) {
 		case "checkout_completed":
-			await payment_service.complete_the_payment(event.session);
+			await Promise.all([
+				payment_service.complete_the_payment(event.session),
+				db.users.cart(event.session.order_detail.buyer_id).reset(),
+			]);
 			break;
 
 		default:

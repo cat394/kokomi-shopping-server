@@ -95,7 +95,7 @@ export async function clear_mock_users(): Promise<void> {
 
 export async function clear_mock_cart(): Promise<void> {
 	await Promise.all([
-		db.users.cart(TestUserIds.BUYER).delete_list(),
+		db.users.cart(TestUserIds.BUYER).reset(),
 		clear_mock_products(),
 	]);
 }
@@ -301,10 +301,10 @@ class TestReviewsRouteResponse {
 	}
 
 	async created_review(user_id: string, review: ReviewToCreate) {
-		await this.db_response.created_data(db.users.reviews(user_id).collection, {
-			...review,
-			author_id: user_id,
-		});
+		await this.db_response.created_data(
+			db.users.reviews(user_id).collection,
+			review
+		);
 	}
 
 	async updated_review(

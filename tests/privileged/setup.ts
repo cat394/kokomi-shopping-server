@@ -30,10 +30,7 @@ export class TestPrivilegedUsersRouteResponse {
 	private db_response: TestDatabaseResponse<PrivilegedUserDocument>;
 
 	constructor(res: Response) {
-		this.db_response = new TestDatabaseResponse(res, {
-			single_body_name: "user",
-			list_body_name: "users",
-		});
+		this.db_response = new TestDatabaseResponse(res);
 	}
 
 	async #check_user_in_db(user: PrivilegedUserToCreate) {

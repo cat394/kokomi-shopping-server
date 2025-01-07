@@ -6,18 +6,8 @@ import {
 	check_own_user_id,
 	check_user_role,
 } from "../middlewares/index.js";
-import type {
-	UserDocument,
-	ReviewDocument,
-	BuyerOrderDocument,
-	CartPopulated,
-	SellerOrderDocument,
-} from "../validator/schema.js";
-import {
-	PermissionError,
-	ResourceNotFoundError,
-	ValidationError,
-} from "../errors/index.js";
+import type { UserDocument } from "../validator/schema.js";
+import { ResourceNotFoundError, ValidationError } from "../errors/index.js";
 import {
 	DataModifier,
 	convert_timestamp_to_isostring,
@@ -58,6 +48,7 @@ private_router
 		let user = await db.users.get(user_id);
 
 		if (
+			user_id !== ctx.state.user.uid &&
 			!has_priviledged_rights(ctx.state.user) &&
 			user?.role &&
 			user.role !== "seller"
@@ -72,9 +63,7 @@ private_router
 
 		const user_id = ctx.state.user.uid;
 
-		const new_user: UserDocument = new DataModifier({
-			...user,
-		})
+		const new_user: UserDocument = new DataModifier(user)
 			.merge_id(user_id)
 			.merge_timestamp()
 			.result();
@@ -97,16 +86,6 @@ private_router
 
 		const user_id = ctx.params.user_id!;
 
-		if (updated.addresses) {
-			const default_addresses_count = updated.addresses.filter(
-				(address) => address.default
-			).length;
-
-			if (default_addresses_count > 1) {
-				throw new ValidationError("BODY_VALIDATION_ERROR");
-			}
-		}
-
 		await db.users.update(user_id, updated);
 
 		ctx.body = { success: true };
@@ -116,7 +95,7 @@ private_router
 
 		await db.users.delete(user_id);
 
-		await db.users.cart(user_id).delete_list();
+		await db.users.cart(user_id).reset();
 
 		ctx.body = { success: true };
 	})
@@ -145,7 +124,21 @@ private_router
 		check_own_user_id,
 		check_user_role("seller"),
 		async (ctx) => {
-			const status = validator.order_status.validate(ctx.request.body);
+			const { status } = validator.order_status.validate(ctx.request.body);
+
+			const user_role = ctx.state.user.role;
+
+			if (user_role === "buyer" && status === "shipped") {
+				throw new ValidationError("BODY_VALIDATION_ERROR", {
+					additional_message:
+						"Buyers cannot mark the order history as 'shipped'.",
+				});
+			} else if (user_role === "seller" && status === "delivered") {
+				throw new ValidationError("BODY_VALIDATION_ERROR", {
+					additional_message:
+						"Sellers cannot mark the order history as 'delivered'.",
+				});
+			}
 
 			const user_id = ctx.params.user_id!;
 
@@ -161,7 +154,7 @@ private_router
 
 			const batch = db.batch();
 
-			const updated = new DataModifier(status).merge_updated_at().result();
+			const updated = new DataModifier({ status }).merge_updated_at().result();
 
 			db.orders.seller(user_id).update(order_id, updated, { batch });
 
@@ -205,7 +198,7 @@ private_router
 	.delete("/:user_id/cart", check_own_user_id, async (ctx) => {
 		const user_id = ctx.params.user_id!;
 
-		await db.users.cart(user_id).delete_list();
+		await db.users.cart(user_id).reset();
 
 		ctx.body = { success: true };
 	})
@@ -223,7 +216,7 @@ private_router
 		const new_review = new DataModifier(review)
 			.merge_id(review.product_id)
 			.merge_timestamp()
-			.merge_props({ author_id: user_id })
+			.merge_props({ created_by: user_id })
 			.result();
 
 		await db.users.reviews(user_id).create(new_review);

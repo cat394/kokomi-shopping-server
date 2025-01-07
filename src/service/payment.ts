@@ -122,7 +122,7 @@ export class MockPaymentAdapter implements PaymentAdapter {
 							short_description: "---SHORT DESCRIPTION---",
 							long_description: "-----------LONG_DESCRIPTION--------------",
 							price: 100,
-							category_id: "category-1",
+							category: "category-1",
 							stock: 100,
 							created_by: TestUserIds.SELLER,
 							created_at: get_timestamp(),

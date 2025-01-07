@@ -14,22 +14,29 @@ const router = new Router<AuthState>({
 router
 	.use(auth_user)
 	.get("/user-id", async (ctx) => {
-		return { id: ctx.state.user.uid };
+		return { success: true, id: ctx.state.user.uid };
 	})
 	.use(check_is_privileged_user)
-	.get("/users", async (ctx) => {
-		const users = await db.privileged_users.get_list(ctx.query);
-
-		ctx.body = { users };
-	})
 	.get("/users/:user_id", async (ctx) => {
 		const user_id = ctx.params.user_id!;
 
-		const user = await db.privileged_users.get(user_id);
+		let user = await db.privileged_users.get(user_id);
 
-		ctx.body = { user };
+		if (
+			ctx.state.user.access_rights !== "admin" &&
+			user?.id !== ctx.state.user.uid
+		) {
+			user = null;
+		}
+
+		ctx.body = { success: true, data: user };
 	})
 	.use(check_is_admin)
+	.get("/users", async (ctx) => {
+		const users = await db.privileged_users.get_list(ctx.query);
+
+		ctx.body = { success: true , data: users };
+	})
 	.post("/users", async (ctx) => {
 		const privileged_user = validator.privileged_user.validate(
 			ctx.request.body
@@ -47,7 +54,7 @@ router
 			),
 		]);
 
-		ctx.body = { user: new_user };
+		ctx.body = { success: true, data: new_user };
 	})
 	.patch("/users/:user_id", async (ctx) => {
 		const privileged_user = validator.privileged_user.partial_validate(
@@ -63,7 +70,7 @@ router
 
 		await db.privileged_users.update(user_id, updated);
 
-		ctx.body = { user: updated, success: true };
+		ctx.body = { success: true };
 	})
 	.delete("/users/:user_id", async (ctx) => {
 		const user_id = ctx.params.user_id!;

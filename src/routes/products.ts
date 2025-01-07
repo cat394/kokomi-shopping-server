@@ -83,6 +83,7 @@ private_router
 
 		let new_product = new DataModifier(request_product)
 			.merge_id()
+			.merge_props({ created_by: ctx.state.user.uid })
 			.merge_timestamp()
 			.result();
 

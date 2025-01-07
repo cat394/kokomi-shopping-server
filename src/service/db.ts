@@ -569,7 +569,7 @@ class CartModel {
 		}
 	}
 
-	async delete_list(): Promise<void> {
+	async reset(): Promise<void> {
 		const cart_items = await this.model.get_list();
 
 		if (cart_items.length > 0) {
@@ -635,7 +635,7 @@ export class OrdersModel {
 		try {
 			const now = new Date();
 
-			const date_of_expiry = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+			const three_hours_ago = new Date(now.getTime() - 3 * 60 * 60 * 1000);
 
 			await db.run_transaction(async (transaction) => {
 				const orders_ref = firestore.collectionGroup(
@@ -645,7 +645,7 @@ export class OrdersModel {
 				const snapshot = await transaction.get(
 					orders_ref
 						.where("status", "==", "unpaid")
-						.where("created_at", "<", date_of_expiry)
+						.where("created_at", "<", three_hours_ago)
 						.limit(50)
 				);
 
