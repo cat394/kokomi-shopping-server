@@ -4,6 +4,7 @@ import payment_router from "./payment.js";
 import webhook_router from "./webhook.js";
 import health_router from "./health.js";
 import privileged_router from "./privileged.js";
+import reviews_router from "./reviews.js";
 
 export {
 	payment_router,
@@ -12,4 +13,5 @@ export {
 	webhook_router,
 	health_router,
 	privileged_router,
+	reviews_router,
 };

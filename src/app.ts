@@ -7,6 +7,7 @@ import {
 	webhook_router,
 	health_router,
 	privileged_router,
+	reviews_router
 } from "./routes/index.js";
 import { handle_error } from "./errors/handlers/index.js";
 import { listen_events } from "./events/handlers.js";
@@ -30,6 +31,8 @@ export function create_app(): App {
 	app.use(webhook_router.allowedMethods());
 	app.use(privileged_router.routes());
 	app.use(privileged_router.allowedMethods());
+	app.use(reviews_router.routes());
+	app.use(reviews_router.allowedMethods());
 
 	listen_events(app);
 
