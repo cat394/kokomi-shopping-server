@@ -25,7 +25,10 @@ import {
 	DocumentResponse,
 	convert_timestamp_to_isostring,
 } from "../utils/index.js";
-import { MAX_NUMBER_OF_CART_ITEMS } from "../const.js";
+import {
+	MAX_NUMBER_OF_CART_ITEMS,
+	MAX_NUMBER_OF_LIST_TO_RETRIEVE,
+} from "../const.js";
 import { DataModifier } from "../utils/data_modifier.js";
 
 class EnhancedBatch {
@@ -152,7 +155,17 @@ export class QueryBuilder {
 			} else if (key === "end_before") {
 				this.cursor.end_before = this.parse_cursor_value(value);
 			} else if (key === "limit") {
-				this.limit = parseInt(value, 10) || 20;
+				try {
+					let limit = parseInt(value, 10);
+
+					if (limit > MAX_NUMBER_OF_LIST_TO_RETRIEVE) {
+						limit = MAX_NUMBER_OF_LIST_TO_RETRIEVE;
+					}
+
+					this.limit = limit;
+				} catch {
+					this.limit = MAX_NUMBER_OF_LIST_TO_RETRIEVE;
+				}
 			} else if (key === "order") {
 				const [field, direction] = value.split(":");
 
@@ -612,7 +625,7 @@ class UsersModel extends Model<UserDocument> {
 	}
 }
 
-export class OrdersModel {
+class OrdersModel {
 	buyer(user_id: UserDocument["id"]) {
 		return new Model<BuyerOrderDocument>(
 			firestore
@@ -677,6 +690,43 @@ export class OrdersModel {
 	}
 }
 
+class ReviewsModel {
+	readonly collection: CollectionGroup;
+
+	constructor() {
+		this.collection = firestore.collectionGroup("reviews");
+	}
+
+	async get_list(
+		query_params?: Context["query"],
+		options: WithTransaction = {}
+	): Promise<DocumentResponse<ReviewDocument>[]> {
+		try {
+			let query: FirebaseFirestore.Query | CollectionReference;
+
+			if (query_params) {
+				const query_builder = new QueryBuilder(query_params);
+
+				query = query_builder.apply(
+					this.collection as unknown as CollectionReference
+				);
+			} else {
+				query = this.collection.limit(50);
+			}
+
+			const snapshot = options.transaction
+				? await options.transaction.get(query)
+				: await query.get();
+
+			return snapshot.docs.map((doc_snap) =>
+				convert_timestamp_to_isostring(doc_snap.data() as ReviewDocument)
+			);
+		} catch (err) {
+			throw new DatabaseError("RETRIEVE_FAILED", { bubbled_error: err });
+		}
+	}
+}
+
 const db = {
 	products: new Model<ProductDocument>(firestore.collection("products")),
 	users: new UsersModel(),
@@ -695,6 +745,7 @@ const db = {
 		});
 	},
 	orders: new OrdersModel(),
+	reviews: new ReviewsModel(),
 	batch() {
 		return new EnhancedBatch();
 	},
