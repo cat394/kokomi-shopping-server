@@ -38,8 +38,10 @@ export type CartPopulated = Omit<
 
 export type CartDocument = CartItemDocument[];
 
+export type CreatedByField = z.infer<typeof CreatedBySchema>;
+
 export type ProductDocument = BaseDocumentFields &
-	z.infer<typeof ProductSchema> & { created_by: string };
+	z.infer<typeof ProductSchema> & CreatedByField;
 
 export type Address = z.infer<typeof AddressSchema>;
 
@@ -67,7 +69,7 @@ export type SellerOrderDocument = OrderDocument & {
 };
 
 export type ReviewDocument = BaseDocumentFields &
-	z.infer<typeof ReviewSchema> & { created_by: string };
+	z.infer<typeof ReviewSchema> & CreatedByField
 
 export type PaymentDetail = z.infer<typeof PaymentSchema>;
 
@@ -89,6 +91,10 @@ export type ReviewToCreate = Omit<
 	DocumentToCreate<ReviewDocument>,
 	"author_id"
 >;
+
+export const CreatedBySchema = z.object({
+	created_by: document_id,
+});
 
 const UserRoleSchema = z.enum(["buyer", "seller"]);
 
