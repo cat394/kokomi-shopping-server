@@ -9,3 +9,6 @@ node_modules/
 # Secret files
 serviceAccountKey.json
 .env
+
+# firebase emulator log
+firebase-debug.log
