@@ -19,7 +19,6 @@ describe("POST /users", () => {
 					address2: "city-1",
 					address3: "town-1",
 				},
-				default: true,
 			},
 		],
 	};
