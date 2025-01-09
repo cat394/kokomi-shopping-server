@@ -32,6 +32,42 @@
 
 - 管理者・モデレーター専用のルートがあり、これらの特権ユーザーの管理を行う
 
+## 準備
+
+1. 依存関係のインストール
+
+   ```bash
+   npm i
+   ```
+
+2. Firebase のサービスアカウントキーをこのプロジェクトのルートに配置する。
+
+   `serviceAccountKey.json`ファイルをルートに配置します。
+
+   ```json
+   {
+   	"type": "service_account",
+   	"project_id": "",
+   	"private_key_id": "",
+   	"private_key": "",
+   	"client_email": "",
+   	"client_id": "",
+   	"auth_uri": "",
+   	"token_uri": "",
+   	"auth_provider_x509_cert_url": "",
+   	"client_x509_cert_url": "",
+   	"universe_domain": ""
+   }
+   ```
+
+3. 環境変数をセットする
+
+   Cloudinary や Stripe の API キーを配置します。`.env.example`を参考に環境変数をセットしてください。Redis に関しては、使わないようであれば、`src/server.ts`を編集して、Redis に関連したコードを削除してください。
+
+4. 準備完了！
+
+   `npm run serve`を行うとサーバーが起動します。プロジェクトは fly.io でデプロイしやすいようになっています。お好きなように、`fly.toml`ファイルを編集してください。
+
 ## 画像の処理
 
 製品画像のサムネイルが保存されるまでの流れを示します。
