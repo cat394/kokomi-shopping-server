@@ -194,42 +194,42 @@ fetch("/users", {
 
 - **管理者の作成**
 
-1. **メールアドレスを設定する**
+  1. **メールアドレスを設定する**
 
-   初めの管理者は`.env`ファイルの`FIRST_USER_EMAIL`の値で登録できます。
+     初めの管理者は`.env`ファイルの`FIRST_USER_EMAIL`の値で登録できます。
 
-   ```text
-   FIRST_USER_EMAIL=<管理者のメールアドレス>
-   ```
+     ```text
+     FIRST_USER_EMAIL=<管理者のメールアドレス>
+     ```
 
-2. **管理者ユーザーでログインする**
+  2. **管理者ユーザーでログインする**
 
-   Firebase Authentication でフロントエンドからログインします。初めの管理者の登録には、メールアドレスを使用するため、Github とかでメールアドレスを隠したままであったりした場合はこれを行えません。ログイン時にはメールアドレスが取得できる認証方法を採用してください。2 人目以降の管理登録からはこれを気にする必要はありません。
+     Firebase Authentication でフロントエンドからログインします。初めの管理者の登録には、メールアドレスを使用するため、Github とかでメールアドレスを隠したままであったりした場合はこれを行えません。ログイン時にはメールアドレスが取得できる認証方法を採用してください。2 人目以降の管理登録からはこれを気にする必要はありません。
 
-3. **管理者ユーザーのユーザー ID を取得する**
+  3. **管理者ユーザーのユーザー ID を取得する**
 
-   管理者とするユーザーの ID を取得します。ログインした状態で、`/priviledged/user-id`へ GET リクエストを送信してください。これにより、ログイン状態にあるユーザーの`uid`が返されます。
+     管理者とするユーザーの ID を取得します。ログインした状態で、`/priviledged/user-id`へ GET リクエストを送信してください。これにより、ログイン状態にあるユーザーの`uid`が返されます。
 
-4. **管理者を作成する**
+  4. **管理者を作成する**
 
-   管理者とするユーザーを作成します。例として、以下のようなフロントエンドのコードになります。
+     管理者とするユーザーを作成します。例として、以下のようなフロントエンドのコードになります。
 
-   ```js
-   const admin = {
-   	id: "<先ほど取得したユーザーID>",
-   	name: "空条承太郎",
-   	email: "jotaro@jojo.com",
-   	access_rights: "admin",
-   };
+     ```js
+     const admin = {
+     	id: "<先ほど取得したユーザーID>",
+     	name: "空条承太郎",
+     	email: "jotaro@jojo.com",
+     	access_rights: "admin",
+     };
 
-   fetch("/priviledged/users", {
-   	method: "POST",
-   	headers: {
-   		Authorization: "Bearer " + admin_id_token,
-   	},
-   	body: JSON.stringify(admin),
-   }).then(() => console.log("管理者の登録が完了しました！"));
-   ```
+     fetch("/priviledged/users", {
+     	method: "POST",
+     	headers: {
+     		Authorization: "Bearer " + admin_id_token,
+     	},
+     	body: JSON.stringify(admin),
+     }).then(() => console.log("管理者の登録が完了しました！"));
+     ```
 
 - **モデレーターの作成**
 
